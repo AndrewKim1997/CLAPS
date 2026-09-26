@@ -99,7 +99,13 @@ class ReleaseChecks(unittest.TestCase):
             features_val, np.zeros((2, 1)), np.ones((2, 1)),
             np.array([[0.5], [0.5]]), (0.01, 1.0, 100.0),
         )
-        self.assertIn(chosen, (0.01, 1.0, 100.0))
+        self.assertEqual(chosen, 100.0)
+        chosen_for_large_residuals = select_prior_precision(
+            features_fit, np.ones((3, 1), dtype=np.float32),
+            features_val, np.zeros((2, 1)), np.ones((2, 1)),
+            np.array([[5.0], [5.0]]), (0.01, 1.0, 100.0),
+        )
+        self.assertEqual(chosen_for_large_residuals, 0.01)
 
 
 if __name__ == "__main__":
