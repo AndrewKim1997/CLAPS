@@ -1,34 +1,51 @@
 # CLAPS
 
-Official code for **CLAPS: Aleatoric-Epistemic Scaling via Last-Layer Laplace for Conformal Regression**, accepted by Transactions on Machine Learning Research (TMLR).
+**Aleatoric–Epistemic Scaling via Last-Layer Laplace for Conformal Regression**  
+Official research code · Transactions on Machine Learning Research (TMLR)
 
-CLAPS combines a learned aleatoric variance with a heteroscedastic last-layer Laplace variance to form the local scale for split conformal regression. The method implementation is in `src/claps/`; the exact Colab-exported code used for the reported experiments is preserved in `archive/claps.py`. The eight standalone scripts in `experiments/` are lossless extracts of its experiment cells. The archival file itself is not a standalone Python program because multiple notebook cells were concatenated into one file.
+[Quick start](#quick-start) · [Paper experiments](#paper-experiments) · [Reproducibility](docs/reproducibility.md) · [License](LICENSE)
 
-The manuscript's public citation and OpenReview link will be inserted once the camera-ready version is published. Until then, the experiment names and table numbers below refer to the accepted review manuscript.
+CLAPS constructs a local scale for split conformal regression from a learned aleatoric variance and last-layer Laplace uncertainty. The learned variance also weights the training features in the Laplace posterior, making the second term sensitive to support in the learned representation.
 
-## Install and try the method
+## Method at a glance
 
-Use Python 3.10 or newer. In a fresh virtual environment, run:
+```mermaid
+flowchart LR
+    A["Heteroscedastic regressor"] --> B["Aleatoric variance"]
+    A --> C["Last-layer features"]
+    B --> D["Noise-weighted Laplace"]
+    C --> D
+    B --> E["Local scale"]
+    D --> E
+    E --> F["Conformal interval"]
+```
+
+## Quick start
+
+With Python 3.10 or newer, run from the repository root:
 
 ```bash
 python -m pip install -e .
 python examples/basic_usage.py
 ```
 
-The example passes pre-fitted model outputs to `CLAPSCalibrator`: the predictive mean, estimated aleatoric variance, and last-layer features. It then calibrates on held-out observations and returns prediction intervals. The example uses illustrative data and does not reproduce a manuscript result. `select_prior_precision` accepts an inner split of training data only; never use calibration or test targets for this selection.
+The [small example](examples/basic_usage.py) calibrates intervals from a model's predictive mean, aleatoric variance, and last-layer features. It uses illustrative arrays; no model training or paper experiment is needed to try the API. The implementation is in [`src/claps/`](src/claps/).
 
-## Reproduce the experiments
+## Paper experiments
 
-Install the additional dependencies in an environment with a compatible PyTorch installation:
+The experiments are independent scripts extracted from the code used for the paper. The main studies are [weak support](experiments/01_weak_support.py) (Tables 1–2), [weighted geometry](experiments/02_weighted_geometry.py) (Table 3), [epistemic regimes](experiments/03_epistemic_regimes.py) (Figure 1), and [real-data benchmarks](experiments/04_real_data.py) (Tables 4–5). The appendix scripts cover [prior precision](experiments/05_prior_precision.py), [representation dimension](experiments/06_representation_dimension.py), [variance floor](experiments/07_variance_floor.py), and [OOD stress](experiments/08_ood_stress.py). See the [experiment-to-result mapping](docs/reproducibility.md) for the additional appendix tables and figure.
+
+Install the experiment dependencies in an environment with PyTorch, then run any script from the repository root. For example:
 
 ```bash
 python -m pip install -e '.[experiments]'
+python experiments/01_weak_support.py
 ```
 
-Each command below runs the full seed count from the manuscript. The synthetic studies use 30 seeds; the real-data studies use 20. They train neural models and may take substantial time. The real-data scripts fetch eight public benchmark datasets from UCI and scikit-learn when needed, so they require network access. Run commands from the repository root.
+<details>
+<summary>Commands for the remaining experiments</summary>
 
 ```bash
-python experiments/01_weak_support.py
 python experiments/02_weighted_geometry.py
 python experiments/03_epistemic_regimes.py
 python experiments/04_real_data.py
@@ -38,14 +55,14 @@ python experiments/07_variance_floor.py
 python experiments/08_ood_stress.py
 ```
 
-Run these scripts independently. They preserve each Colab cell's original configuration, baselines, training, calibration, evaluation, and reporting code. Do not run `archive/claps.py` as one Python script. Experiment 1 corresponds to Tables 1–2; Experiment 2 to Table 3 and Appendix Table 6; Experiment 3 to Figure 1 and Appendix Tables 7–8; Experiment 4 to Tables 4–5 and Appendix Table 9. The prior-precision, representation-dimension, variance-floor, and OOD scripts correspond respectively to Appendix Tables 10–12 and Figure 2/Table 13. Some scripts display results while the later appendix scripts also save CSVs or figures in their configured output locations. See [the reproducibility notes](docs/reproducibility.md) for provenance and limits.
+</details>
 
-## Verify the source and package
+The scripts retain the paper's seed counts: 30 for synthetic studies and 20 for real-data studies. Real-data runs download public benchmark datasets and require network access. Training all methods and seeds can take substantial time.
 
-The `archive/claps.py` SHA-256 is `7522c43a5ecef32c59b75b8d7a1b3f21361648f703422a7e1691f389bfbbcc60`. Regenerate the independent scripts from the preserved source with `python tools/extract_experiments.py`. This checks the hash and the syntax of every extracted experiment. After installation, run `python -m unittest discover -s tests -v` to check source integrity and compare the package's CLAPS intervals numerically with the original real-data implementation on fixed synthetic arrays.
+## Source and reproducibility
 
-The original Colab code was used for the reported experiments. The standalone scripts preserve that experiment code byte for byte, apart from the notebook-cell markers; this packaging work does not require repeating every paper-scale run. We checked their syntax and compared the reusable CLAPS calculations against the original real-data code on fixed inputs. We did not independently rerun the full neural experiments in this packaging environment. A reader who wishes to reproduce them will need PyTorch and access to the original public datasets. Python package version ranges are installation bounds, not a record of the original Colab environment.
+[`archive/claps.py`](archive/claps.py) is the unmodified Colab export used for the reported experiments. It contains multiple notebook cells and is not meant to run as one Python script. The files in [`experiments/`](experiments/) preserve those cells' experiment code; [`tools/extract_experiments.py`](tools/extract_experiments.py) checks the source hash and regenerates the standalone scripts. The reusable API was checked against the original real-data calculations on fixed inputs. Further details and the scope of those checks are in the [reproducibility notes](docs/reproducibility.md).
 
 ## License
 
-The repository is released under the MIT License in `LICENSE`. Dataset licenses and terms remain with their respective providers; this repository fetches the datasets rather than redistributing them.
+Released under the [MIT License](LICENSE). Public datasets are fetched from their providers and retain their own terms.
