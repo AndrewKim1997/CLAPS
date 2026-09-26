@@ -44,7 +44,7 @@ Run these scripts independently. They preserve each Colab cell's original config
 
 The `archive/claps.py` SHA-256 is `7522c43a5ecef32c59b75b8d7a1b3f21361648f703422a7e1691f389bfbbcc60`. Regenerate the independent scripts from the preserved source with `python tools/extract_experiments.py`. This checks the hash and the syntax of every extracted experiment. After installation, run `python -m unittest discover -s tests -v` to check source integrity and compare the package's CLAPS intervals numerically with the original real-data implementation on fixed synthetic arrays.
 
-The experimental scripts have been separated and syntax checked; the full paper-scale neural training runs and their table values still require an environment with PyTorch, internet access to the original datasets, and a full reproduction run. Python package version ranges are installation bounds, not a record of the original Colab environment.
+The original Colab code was used for the reported experiments. The standalone scripts preserve that experiment code byte for byte, apart from the notebook-cell markers; this packaging work does not require repeating every paper-scale run. We checked their syntax and compared the reusable CLAPS calculations against the original real-data code on fixed inputs. We did not independently rerun the full neural experiments in this packaging environment. A reader who wishes to reproduce them will need PyTorch and access to the original public datasets. Python package version ranges are installation bounds, not a record of the original Colab environment.
 
 ## License
 
